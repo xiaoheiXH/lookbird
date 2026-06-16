@@ -1,0 +1,849 @@
+/* 基础样式重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #ffffff;
+    font-family: "Microsoft YaHei", sans-serif;
+}
+
+#game-container {
+    position: relative;
+    width: 1280px;  /* 固定宽度 */
+    height: 720px;  /* 固定高度 (16:9) */
+    background-color: #000;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    /* 居中并根据屏幕缩放 */
+    transform-origin: center center;
+}
+
+/* 场景通用样式 */
+.scene {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: none;
+    overflow: hidden;
+}
+
+.scene.active {
+    display: block;
+}
+
+/* 主界面背景 */
+#main-menu .background-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('images/zhujiemian2.jpg');
+    background-size: 100% 100%; /* 固定比例填充 */
+    background-position: center;
+    z-index: 1;
+}
+
+/* 装备选取页面背景 */
+#equipment-select .background-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('images/beijin.png');
+    background-size: 100% 100%; /* 固定比例填充 */
+    background-position: center;
+    z-index: 1;
+}
+
+/* 装备选取框居中 */
+.re-box {
+    width: 50%;  /* 基于1280px宽度的50% = 640px */
+    height: auto;
+    object-fit: contain;
+    margin-top: 20.83%;  /* 150px / 720px ≈ 20.83% */
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* 相机选取页面背景 */
+#camera-select .background-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('images/box1.png');
+    background-size: contain; /* 确保能看到整张图 */
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 1;
+}
+
+/* 右侧面板容器 */
+.right-panel {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+/* 相机图标通用样式 */
+.camera-icon {
+    position: absolute; /* 改为绝对定位，互不影响 */
+    object-fit: contain;
+    cursor: pointer;
+    transition: transform 0.2s;
+    pointer-events: auto;
+}
+
+.camera-icon:hover {
+    transform: scale(1.1);
+}
+
+/* --- 相机1 位置与大小预留 --- */
+.camera-1 {
+    width: 270px;      /* 宽度调整 */
+    height: auto;      /* 高度自动 */
+    left: 670px;       /* 使用像素调整水平位置 */
+    top: 170px;        /* 使用像素调整垂直位置 */
+}
+
+/* --- 相机2 位置与大小预留 --- */
+.camera-2 {
+    width: 300px;      /* 宽度调整 */
+    height: auto;      /* 高度自动 */
+    left: 300px;       /* 使用像素调整水平位置 */
+    top: 180px;        /* 使用像素调整垂直位置 */
+}
+
+/* 场景选择页面背景 */
+#scene-selection .background-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('images/场景选择_木塞板_背景1.png');
+    background-size: 100% 100%; /* 固定比例填充 */
+    background-position: center;
+    z-index: 1;
+}
+
+/* 场景选择交互选项容器 */
+.scene-option-container {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+}
+
+.scene-option-thumb {
+    width: 300px; /* 默认宽度，可根据需要调整 */
+    height: auto;
+    cursor: pointer;
+    transition: transform 0.3s;
+    /* 页面位置信息里加入旋转：预留调整代码 */
+    transform: rotate(-5deg); /* 示例旋转角度 */
+}
+
+.scene-option-thumb:hover {
+    transform: translate(0, -10px) rotate(0deg) scale(1.05);
+}
+
+/* 场景01背景：河口湿地公园01 */
+#scene-hekou-01 .background-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('images/场景_河口湿地公园01_场景图01_底图.png');
+    background-size: 100% 100%; /* 固定比例填充 */
+    background-position: center;
+    z-index: 1;
+}
+
+/* 场景01交互点容器 */
+.interactive-points {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.point {
+    position: absolute;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: opacity 0.2s;
+}
+
+/* 删除了 .point:hover 的放大效果以防止画面抽搐 */
+
+/* --- 交互点01 位置与大小预留 (使用百分比) --- */
+.point-1 {
+    width: 494px;      /* 宽度调整 */
+    height: auto;
+    left: 85%;         /* 【使用百分比调整水平位置：0%最左，100%最右】 */
+    top: 43.8%;          /* 【使用百分比调整垂直位置：0%最顶，100%最低】 */
+    transform: translate(-50%, -50%);
+}
+
+/* --- 交互点02 位置与大小预留 (使用百分比) --- */
+.point-2 {
+    width: 529px;      /* 宽度调整 */
+    height: auto;
+    left: 29.7%;         /* 【使用百分比调整水平位置】 */
+    top: 85.5%;          /* 【使用百分比调整垂直位置】 */
+    transform: translate(-50%, -50%);
+}
+
+/* --- 交互点03 位置与大小预留 (使用百分比) --- */
+.point-3 {
+    width: 757px;      /* 宽度调整 */
+    height: auto;
+    left: 33.2%;         /* 【使用百分比调整水平位置】 */
+    top: 57.3%;          /* 【使用百分比调整垂直位置】 */
+    transform: translate(-50%, -50%);
+}
+
+/* --- Touch 场景样式 --- */
+#touch-scene {
+    cursor: grab;
+    overflow: hidden;
+}
+
+#touch-scene:active {
+    cursor: grabbing;
+}
+
+#touch-world {
+    position: absolute;
+    width: 300%;
+    height: 300%;
+    left: 0;
+    top: 0;
+}
+
+#camera-touch-world {
+    position: absolute;
+    width: 300%;
+    height: 300%;
+    left: 0;
+    top: 0;
+}
+
+/* 禁用 UI 交互的样式 */
+.disabled-ui {
+    pointer-events: none;
+    opacity: 0.8; /* 稍微调暗，提示不可用 */
+}
+
+#touch-scene .background-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: 100% 100%;
+    background-position: center;
+    z-index: 1;
+}
+
+.bird-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.bird-portrait {
+    position: absolute;
+    width: 120px; /* 进一步缩小鸟类立绘 */
+    height: auto;
+    object-fit: contain;
+    transform: translate(-50%, -50%); /* 确保 left/top 是中心点 */
+}
+
+/* 屏幕中心引导线 (可选，用于调试或给玩家提示) */
+.center-guideline {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+/* UI 层 */
+.ui-layer {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    pointer-events: none; /* 让点击穿透到底部，如果需要的话 */
+}
+
+.ui-layer button {
+    pointer-events: auto; /* 按钮需要响应点击 */
+}
+
+/* 顶部栏 */
+.top-bar {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* 中间内容 */
+.center-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-title {
+    color: white;
+    font-size: 3rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    margin-bottom: 2rem;
+}
+
+/* 底部栏 */
+.bottom-bar {
+    display: flex;
+    justify-content: center;
+}
+
+/* 按钮基础样式 */
+.icon-button {
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: 2px solid white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.icon-button:active {
+    transform: scale(0.9);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.start-button {
+    background: #f1c40f;
+    color: #2c3e50;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: all 0.2s;
+}
+
+.start-button:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+/* 响应式适配：核心逻辑 */
+
+/* PC 端 / 横屏设备 (宽度 > 高度) */
+@media screen and (min-aspect-ratio: 1/1) {
+    .ui-layer {
+        flex-direction: row;
+        align-items: center;
+        padding: 40px;
+    }
+
+    .top-bar {
+        position: absolute;
+        top: 40px;
+        right: 40px;
+    }
+
+    .bottom-bar {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .game-title {
+        font-size: 5rem;
+    }
+}
+
+/* 移动端 / 竖屏设备 (高度 > 宽度) */
+@media screen and (max-aspect-ratio: 1/1) {
+    .ui-layer {
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 60px 20px;
+    }
+
+    .game-title {
+        font-size: 3.5rem;
+        margin-top: 20%;
+    }
+
+    .top-bar {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .bottom-bar {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 10%;
+    }
+
+    .start-button {
+        width: 80%;
+        max-width: 300px;
+    }
+}
+
+/* 针对超宽屏或特殊比例的微调 */
+@media screen and (min-width: 1200px) {
+    .game-title {
+        font-size: 4rem;
+    }
+}
+
+/* Camera 镜头场景样式 */
+#camera-view {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* 相机边框层 */
+.camera-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    z-index: 100;
+    pointer-events: none; /* 边框不阻挡鼠标事件 */
+}
+
+/* 内容视口层 - 将原Touch内容嵌入于此 */
+.camera-viewport {
+    position: absolute;
+    /* 假设 camerabord.png 的透明视口区域居中，大小约为整体的 70% 宽，可根据实际图片调整 */
+    width: 65%;
+    height: 75%;
+    top: 12.5%;
+    left: 10%;
+    z-index: 50;
+    overflow: hidden;
+    cursor: grab;
+}
+
+.camera-viewport:active {
+    cursor: grabbing;
+}
+
+/* 适配 camera-viewport 内的 touch-world 和 bird-layer */
+#camera-view .background-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: 100% 100%;
+    background-position: center;
+    z-index: 1;
+}
+
+#camera-view .bird-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+#camera-view .bird-portrait {
+    position: absolute;
+    width: 120px;
+    height: auto;
+    object-fit: contain;
+    transform: translate(-50%, -50%);
+}
+
+#camera-view .center-guideline {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 60;
+}
+
+/* 右侧UI空间 */
+.camera-ui-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20%; /* 留出 20% 的右侧空间 */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.1); /* 轻微暗色背景，可选 */
+}
+
+/* 焦距调节图标 */
+.zoom-control {
+    /* 尺寸为原基础(60px)的2倍再放大1.2倍 = 144px */
+    width: 100%;
+    max-width: 144px;
+    height: auto;
+    cursor: grab;
+    transition: transform 0.05s ease-out;
+    user-select: none;
+    margin-top: 100px; /* 向下移动位置 */
+}
+
+.zoom-control:active {
+    cursor: grabbing;
+}
+
+.camera-end-button {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    width: 100px;
+    height: auto;
+    cursor: pointer;
+    z-index: 300;
+    transition: transform 0.2s;
+}
+
+.camera-end-button:hover {
+    transform: scale(1.1);
+}
+
+.camera-end-button:active {
+    transform: scale(0.95);
+}
+
+/* 识别按钮样式 */
+.identify-button {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    border-radius: 30px;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: all 0.2s;
+}
+
+.identify-button:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+/* 上传页面样式 */
+#upload-scene .background-layer,
+#bird-detail-scene .background-layer {
+    background-color: #2c3e50;
+}
+
+.upload-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+    z-index: 10;
+}
+
+.upload-title {
+    color: white;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.upload-hint {
+    color: rgba(255,255,255,0.9);
+    font-size: 1rem;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.upload-preview {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: rgba(255,255,255,0.1);
+    border: 3px dashed rgba(255,255,255,0.5);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 25px;
+    overflow: hidden;
+}
+
+.upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: rgba(255,255,255,0.7);
+    font-size: 1.2rem;
+}
+
+.placeholder-icon {
+    font-size: 4rem;
+    margin-bottom: 10px;
+}
+
+.preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.upload-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.upload-btn {
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: all 0.2s;
+}
+
+.upload-btn:active {
+    transform: translateY(2px);
+}
+
+.recognize-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: all 0.2s;
+}
+
+.recognize-btn:active {
+    transform: translateY(2px);
+}
+
+.back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: 2px solid white;
+    padding: 10px 25px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    z-index: 20;
+}
+
+/* 鸟类详细页样式 */
+.detail-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 80px 20px 30px;
+    z-index: 10;
+}
+
+.loading-text {
+    color: white;
+    text-align: center;
+    font-size: 1.5rem;
+    margin-top: 100px;
+}
+
+.bird-detail-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.bird-name {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.bird-latin {
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    font-style: italic;
+    margin-bottom: 20px;
+}
+
+.bird-info-item {
+    margin-bottom: 15px;
+}
+
+.bird-info-label {
+    font-weight: bold;
+    color: #34495e;
+    margin-bottom: 5px;
+}
+
+.bird-info-content {
+    color: #2c3e50;
+    line-height: 1.6;
+}
+
+.bird-conf {
+    background: #3498db;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 15px;
+    display: inline-block;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+/* 图鉴页面样式 */
+#lookbook-scene {
+    width: 100%;
+    height: 100%;
+}
+
+.lookbook-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('images/lookbook.png');
+    background-size: cover; /* 改为cover确保完整填充 */
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.lookbook-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 80px 40px 40px;
+    z-index: 10;
+}
+
+.lookbook-content {
+    display: flex;
+    gap: 40px;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.lookbook-left {
+    flex: 0 0 auto;
+}
+
+.lookbook-image {
+    max-height: 100vh;
+    max-width: 600px;
+    object-fit: contain;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.lookbook-right {
+    flex: 1;
+    max-width: 500px;
+    background: rgba(255,255,255,0.95);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    margin-left: 100px; /* 向右移动70px */
+}
+
+.lookbook-title {
+    color: #2c3e50;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid #3498db;
+}
+
+.lookbook-description {
+    color: #34495e;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    text-align: justify;
+}

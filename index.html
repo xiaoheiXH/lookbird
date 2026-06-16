@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>观鸟 H5 交互设计</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- 主界面 -->
+        <section id="main-menu" class="scene active">
+            <div class="background-layer"></div>
+            <div class="ui-layer">
+                <div class="top-bar">
+                    <button id="btn-settings" class="icon-button">设置</button>
+                </div>
+                <div class="center-content">
+                    <h1 class="game-title">观鸟</h1>
+                    <button id="btn-start" class="start-button">开始探索</button>
+                    <button id="btn-identify" class="identify-button">福州市区鸟类识别</button>
+                </div>
+                <div class="bottom-bar">
+                    <button id="btn-collection" class="icon-button">图鉴</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 装备选取页面 -->
+        <section id="equipment-select" class="scene">
+            <div class="background-layer"></div>
+            <div class="ui-layer">
+                <div class="center-content">
+                    <img src="images/re-box.png" alt="装备选择框" class="re-box" id="img-re-box">
+                </div>
+            </div>
+        </section>
+
+        <!-- 相机选取页面 -->
+        <section id="camera-select" class="scene">
+            <div class="background-layer"></div>
+            <div class="ui-layer">
+                <div class="right-panel">
+                    <img src="images/camera(1).png" alt="相机1" class="camera-icon camera-1">
+                    <img src="images/camera(2).png" alt="相机2" class="camera-icon camera-2">
+                </div>
+            </div>
+        </section>
+
+        <!-- 场景选择页面 -->
+        <section id="scene-selection" class="scene">
+            <div class="background-layer"></div>
+            <div class="ui-layer">
+                <div class="scene-option-container">
+                    <img src="images/场景选择_河口湿地公园_小图.png" alt="河口湿地公园" class="scene-option-thumb" id="thumb-hekou">
+                </div>
+            </div>
+        </section>
+
+        <!-- 场景01：河口湿地公园01 -->
+        <section id="scene-hekou-01" class="scene">
+            <div class="background-layer"></div>
+            <div class="ui-layer">
+                <div class="interactive-points">
+                    <img src="images/场景_河口湿地公园01_场景图01_交互01.png" alt="交互点01" class="point point-1">
+                    <img src="images/场景_河口湿地公园01_场景图01_交互02.png" alt="交互点02" class="point point-2">
+                    <img src="images/场景_河口湿地公园01_场景图01_交互03.png" alt="交互点03" class="point point-3">
+                </div>
+            </div>
+        </section>
+
+        <!-- Touch 观察场景 (现在也包含相机UI) -->
+        <section id="touch-scene" class="scene">
+            <!-- Camera 边框层 (Touch阶段也可见) -->
+            <img src="images/camerabord.png" alt="相机边框" class="camera-border">
+
+            <!-- 视口区域 (拖拽在此区域内进行) -->
+            <div class="camera-viewport" id="touch-viewport">
+                <div id="touch-world">
+                    <div class="background-layer"></div>
+                    <div class="bird-layer">
+                        <img src="" alt="目标鸟类" class="bird-portrait" id="bird-portrait">
+                    </div>
+                </div>
+                <div class="center-guideline"></div>
+            </div>
+
+            <!-- 右侧UI空间 (Touch阶段禁用交互) -->
+            <div class="camera-ui-panel disabled-ui">
+                <img src="images/焦距调节.svg" alt="焦距调节" class="zoom-control">
+            </div>
+        </section>
+
+        <!-- Camera 镜头场景 (成功后的交互阶段) -->
+        <section id="camera-view" class="scene">
+            <img src="images/camerabord.png" alt="相机边框" class="camera-border">
+            
+            <div class="camera-viewport">
+                <div id="camera-touch-world">
+                    <div class="background-layer" id="camera-background"></div>
+                    <div class="bird-layer">
+                        <img src="" alt="目标鸟类" class="bird-portrait" id="camera-bird-portrait">
+                    </div>
+                </div>
+                <div class="center-guideline"></div>
+            </div>
+            
+            <div class="camera-ui-panel">
+                <img src="images/焦距调节.svg" alt="焦距调节" class="zoom-control" id="zoom-control">
+            </div>
+            
+            <img src="images/按钮.png" alt="结束" class="camera-end-button" id="camera-end-button">
+        </section>
+
+        <!-- 上传/拍照页面 -->
+        <section id="upload-scene" class="scene">
+            <div class="background-layer"></div>
+            <div class="upload-container">
+                <h2 class="upload-title">福州市区鸟类识别</h2>
+                <p class="upload-hint">💡 提示：请上传小于2MB的图片</p>
+                <div class="upload-preview" id="upload-preview">
+                    <div class="upload-placeholder">
+                        <span class="placeholder-icon">📷</span>
+                        <span>点击选择图片或拍照</span>
+                    </div>
+                    <img id="preview-image" class="preview-image" style="display: none;" />
+                </div>
+                <div class="upload-buttons">
+                    <button id="btn-gallery" class="upload-btn">选择图片</button>
+                    <button id="btn-camera" class="upload-btn">拍照</button>
+                    <button id="btn-recognize" class="recognize-btn" style="display: none;">识别鸟类</button>
+                </div>
+                <input type="file" id="file-input" accept="image/*" style="display: none;" />
+                <button id="btn-back-upload" class="back-button">返回</button>
+            </div>
+        </section>
+
+        <!-- 鸟类详细页 -->
+        <section id="bird-detail-scene" class="scene">
+            <div class="background-layer"></div>
+            <div class="detail-container">
+                <button id="btn-back-detail" class="back-button">返回</button>
+                <div class="bird-detail-content" id="bird-detail-content">
+                    <div class="loading-text">加载中...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 图鉴页面 -->
+        <section id="lookbook-scene" class="scene">
+            <div class="lookbook-background"></div>
+            <div class="lookbook-container">
+                <button id="btn-back-lookbook" class="back-button">返回</button>
+                <div class="lookbook-content">
+                    <div class="lookbook-left">
+                        <img src="images/book_bird1.jpg" alt="大白鹭" class="lookbook-image">
+                    </div>
+                    <div class="lookbook-right">
+                        <h2 class="lookbook-title">大白鹭</h2>
+                        <p class="lookbook-description">
+                            大白鹭（学名：Ardea alba）是鹈形目鹭科鹭属鸟类，又名白庄、公子、白洼。全身羽毛洁白；眼黄色；喙橙黄色（繁殖期黑色）；面部及周眼皮肤呈绿色；跗蹠和脚黑色。背上、肩上披有蓑羽，长超过尾部，生殖期后蓑羽消失。大白鹭广泛分布在世界各地。在中国见于东北、河北、江苏、云南、广东、海南、台湾、福建等地。栖息于河川、海滨、沼泽湿地或水田中。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script src="gameState.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

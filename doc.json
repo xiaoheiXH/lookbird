@@ -1,0 +1,567 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "懂鸟动物识别 API V2.0",
+    "description": "#### 懂鸟 API 是一个异步 API 集合，供用户调用提供识别结果以及动物百科文字资料的 API \n\n API 系统中的动物特指以下类别，超出此范围目前不能支持。请注意当前版本号及类别支持的版本号。\n\n| 类别   | 标识 | 识别支持版本号 | 识别支持类别数量 | 百科支持版本号 | 百科支持类别数量 |\n|--------|------|----------------|-----------------|----------------|-----------------|\n| 鸟     | B    | 1.0            | 11151           | 2.0            | 11271           |\n| 兽     | M    | 2.0            | 3820            | 2.1            | 6649            |\n| 两栖   | A    | 2.0            | 5589            | 2.2            | 8689            |\n| 爬行   | R    | 2.0            | 8592            | 2.2            | 12019           |\n| 其他1  | F    | 3.0            | 敬请期待         | 3.1            | 敬请期待         |\n| 其他2  | S    | 3.1            | 敬请期待         | 3.2            | 敬请期待         |\n",
+    "version": "2.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://ai.open.hhodata.com/api/v2"
+    }
+  ],
+  "paths": {
+    "/dongniao": {
+      "post": {
+        "summary": "上传图片",
+        "description": "上传图片必须上传一个 2M 以内的原始图片。附带裁剪格式为可选，如没有则服务会尝试进行主体识别，如带有指定位置则使用该位置裁剪后进行识别。为保证最佳识别效果，指定位置应该为正方形并保证动物主体居中并最大化。",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "api_key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "调用的api_key"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "上传图片"
+                  },
+                  "upload": {
+                    "type": "string",
+                    "description": "上传数量，目前必须为 1，只支持 1 张图片识别"
+                  },
+                  "class": {
+                    "type": "string",
+                    "description": "缺省为‘B’，即只返回鸟类。必须为'ABMR' 之组合。如‘BM’表示返加鸟类与兽类识别结果"
+                  },
+                  "x1": {
+                    "type": "integer",
+                    "description": "指定识别位置的左上角 x 坐标"
+                  },
+                  "y1": {
+                    "type": "integer",
+                    "description": "指定识别位置的左上角 y 坐标"
+                  },
+                  "x2": {
+                    "type": "integer",
+                    "description": "指定识别位置的右下角 x 坐标"
+                  },
+                  "y2": {
+                    "type": "integer",
+                    "description": "指定识别位置的右下角 y 坐标"
+                  },
+                  "area": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "见附录 1，使用国家、地区编码过滤识别结果。鸟类支持部分国家/地区的二级地区，其他只支持到国家/地区"
+                  },
+                  "did": {
+                    "type": "string",
+                    "description": "设备/客户端唯一 ID。1-32 位，只能大小写字母或数字，可以为客户设备 ID 的 md5 hash 值，用于调试及必要情况下进行统计"
+                  }
+                },
+                "required": ["image", "upload", "did"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "### 返回值含义描述\n\n| 返回值 | 含义                   | 描述                                                                                  |\n|--------|------------------------|---------------------------------------------------------------------------------------|\n| 1000   | 正常返回               | 返回信息为识别 ID，请使用获取结果 API 获取相关 ID 的识别结果；                         |\n| 1001   | 图片大小错误           | 图片大小错误，超过 2M或太小；                                                         |\n| 1002   | 图片格式错误           | 错误的图片格式。仅支持 jpg，且最小边长必须大于 50，最大边长小于8192；                 |\n| 1003   | 设备 ID 错误           | 设备 ID 为 1-32 位只能为大小写字母及数字；                                            |\n| 1004   | 动物种类错误           | 动物种类必须为 BMARFS 的组合或空白。2.0 只支持 BMAR 或空白（缺省只返回鸟类识别结果）；|\n| 1005   | 地区错误               | 地区必须在支持范围内；                                                                |\n| 1006   | IP 调用 IP 地址锁定    | 如用户设定调用 IP 地址锁定；                                                          |\n| 1011   | 物种不在地区范围内     | 检测到动物，但该物种不在当前地区分布范围内；                                          |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "自定义状态码"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "状态码描述"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recognitionId": {
+                          "type": "string",
+                          "description": "返回信息为识别 ID，请使用获取结果 API 获取相关 ID 的识别结果"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "status": "1000",
+                    "message": "正常返回",
+                    "data": [1000, "HH-BM_20240713_05483816735_1-ABCDEFG"]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "错误请求",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "自定义状态码"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "状态码描述"
+                    }
+                  },
+                  "examples": {
+                    "1001": {
+                      "summary": "图片大小错误",
+                      "value": {
+                        "status": "1001",
+                        "message": "图片大小错误，超过 2M或太小"
+                      }
+                    },
+                    "图片格式错误": {
+                      "summary": "图片格式错误",
+                      "value": {
+                        "status": "1002",
+                        "message": "错误的图片格式。仅支持 jpg，且最小边长必须大于 50，最大连长小于8192"
+                      }
+                    },
+                    "设备 ID 错误": {
+                      "summary": "设备 ID 错误",
+                      "value": {
+                        "status": "1003",
+                        "message": "设备 ID 为 1-32 位只能为大小写字母及数字"
+                      }
+                    },
+                    "动物种类错误": {
+                      "summary": "动物种类错误",
+                      "value": {
+                        "status": "1004",
+                        "message": "动物种类必须为 BMARFS 的组合或空白。2.0 只支持 BMAR 或空白（缺省只返回鸟类识别结果）"
+                      }
+                    },
+                    "地区错误": {
+                      "summary": "地区错误",
+                      "value": {
+                        "status": "1005",
+                        "message": "地区必须在支持范围内"
+                      }
+                    },
+                    "IP 调用 IP 地址锁定": {
+                      "summary": "IP 调用 IP 地址锁定",
+                      "value": {
+                        "status": "1006",
+                        "message": "如用户设定调用 IP 地址锁定"
+                      }
+                    },
+                    "物种不在地区范围内": {
+                      "summary": "物种不在地区范围内",
+                      "value": {
+                        "status": "1011",
+                        "message": "检测到动物，但该物种不在当前地区分布范围内"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "    /dongniao": {
+      "post": {
+        "summary": "上传鸟鸣（语音识别）",
+        "description": "上传一段鸟鸣音频识别鸟种。与图片识别共用 upload / resultid 通道及同一套 api_key、配额与限流，仅上传时传 sound 文件（而非 image）。上传成功后返回任务 ID，再用「获取识别结果」接口轮询；服务端按任务 ID 自动区分图像与语音。语音按上传音频时长累加秒数计费（向上取整、识别成功才计），与图像配额相互独立。",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "api_key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "调用的api_key"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sound": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "音频文件（mp3/wav/m4a/flac/ogg，最大 5MB）"
+                  },
+                  "upload": {
+                    "type": "string",
+                    "description": "上传数量，固定为 1"
+                  },
+                  "area": {
+                    "type": "string",
+                    "description": "见附录 1，使用国家、地区编码进行地理分布过滤；缺省按 WORLD 不过滤"
+                  },
+                  "did": {
+                    "type": "string",
+                    "description": "设备/客户端唯一 ID。1-32 位，只能大小写字母或数字"
+                  }
+                },
+                "required": ["sound", "upload"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "### 上传返回值\n\n| 返回值 | 含义           | 描述                                                              |\n|--------|----------------|-------------------------------------------------------------------|\n| 1000   | 正常返回       | 返回任务 ID（格式与图片识别一致），请使用「获取识别结果」接口轮询查询语音识别结果。 |\n| 1001   | 音频大小错误   | 音频文件超过 5MB。                                                |\n| 1002   | 音频格式错误   | 缺少 sound 文件或音频格式无效。                                  |\n| 1003   | 设备 ID 错误   | 设备 ID 为 1-32 位只能为大小写字母及数字。                       |\n| 1005   | 地区错误       | 地区编码无效或不在支持范围内。                                   |\n\n### 语音识别结果结构\n\n用「获取识别结果」接口（传同一 resultid）轮询语音任务，处理中返回 `[1001, \"{resultid}\"]`，识别完成后返回字典：\n\n```json\n[1000, {\n  \"duration\": 12.0,\n  \"summary\": [[8757, 0.83, \"Turdus merula\", \"欧乌鸫\"]],\n  \"splits\": [[0.0, 3.0, [[8757, 0.91, \"Turdus merula\", \"欧乌鸫\"]]]]\n}]\n```\n\n| 字段 | 说明 |\n|------|------|\n| `duration` | 音频时长（秒） |\n| `summary` | 全局物种汇总，按置信度降序，每项 `[物种ID, 置信度(0~1), 学名, 中文名]` |\n| `splits` | 分时间段结果，每项 `[起始秒, 结束秒, [该段物种列表]]`，段内物种项结构同 summary |\n\n物种 ID 可继续用「获取百科资料」接口（animalid）取详情。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "status": "1000",
+                    "message": "正常返回",
+                    "data": [1000, "HH-B_20260603_143052123456_1"]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "错误请求",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "examples": {
+                    "音频大小错误": {
+                      "summary": "音频大小错误",
+                      "value": {
+                        "status": "1001",
+                        "message": "音频超过 5MB"
+                      }
+                    },
+                    "音频格式错误": {
+                      "summary": "音频格式错误",
+                      "value": {
+                        "status": "1002",
+                        "message": "缺少 sound 文件或音频格式无效"
+                      }
+                    },
+                    "地区错误": {
+                      "summary": "地区错误",
+                      "value": {
+                        "status": "1005",
+                        "message": "地区编码无效"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    " /dongniao": {
+      "post": {
+        "summary": "获取识别结果",
+        "description":"在使用上传图片 API 得到识别 ID 后，在稍后时候（至少 1 秒后）调用该接口获取识别结果。如果识别已完成，系统将返回结果。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "resultid": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "识别ID"
+                  }
+                },
+                "required": ["resultid"]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "header",
+            "name": "api_key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "调用的api_key"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "## 返回值含义描述\n\n| 返回值 | 含义                 | 描述                                                                                  |\n|--------|----------------------|---------------------------------------------------------------------------------------|\n| 1000   | 识别结果             | 识别结果在返回信息中，此时返回信息为一个数组，具体描述见后；                          |\n| 1001   | 结果未生成           | 结果未生成，必要情况下 1 秒后重试。请限定重试次数，如超过 5 次仍未得到识别结果，可认为识别已超时。 |\n| 1008   | 没有检测到动物目标   | 图片中未检测到动物目标；                                                              |\n| 1009   | 没有识别出动物       | 虽然可以检测到动物，但未能识别出动物；                                                |\n\n ### **识别结果说述：** \n\n 识别结果为一组数组，表明该图片可识别出多少个单独的动物目标及其类别。每一个数据组为一个包括“box”及“list”元素的字典。“box”为 4 个元素的数组，分别表示⻓方形左上⻆与右下⻆两点之座标。“list ” 为不超过 10 条按照识别准确率倒序之数组，每一个数组元素包含另一四个元素之数组，分别为“置信度”、“中文名|英文名|拉丁名”、“ID”、“动物类别”。注意本列表可能为空，表明不能识别出相关动物。",
+
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recognitionId": {
+                          "type": "string"
+                        },
+                        "animal": {
+                          "type": "string"
+                        },
+                        "confidence": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "status": "success",
+                    "data": [
+                      {
+                        "box": [31, 9, 379, 356],
+                        "list": [
+                          [
+                            97.6,
+                            "北美红松鼠|North American Red Squirrel|Tamiasciurus hudsonicus",
+                            6534,
+                            "M"
+                          ]
+                        ]
+                      },
+                      {
+                        "box": [478, 353, 755, 469],
+                        "list": [
+                          [84.2, "黑顶山雀", 7035, "B"],
+                          [8.1, "卡罗山雀", 7034, "B"]
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "系统异常",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "状态值",
+                  "message": "错误描述"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "  /dongniao": {
+      "post": {
+        "summary": "获取百科资料",
+        "description":"根据获取结果中的 ID 与动物类别，可以获取该动物的百科资料。注意：百科资料描述由 AI 整理，请自行判断其准确性与适用场景。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "animalid": {
+                    "type": "integer",
+                    "format": "binary",
+                    "description": "动物 ID"
+                  },
+                  "class": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "动物类别，'ABMR' 之一"
+                  }
+                },
+                "required": ["animalid", "class"]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "header",
+            "name": "api_key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "调用的api_key"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "### 返回值含义描述\n\n| 返回值 | 含义             | 描述                                                                                      |\n|--------|------------------|-------------------------------------------------------------------------------------------|\n| 1000   | 百科内容         | 识别结果在返回信息中，此时返回信息为一个百科信息字典，具体内容参考附例。                  |\n| 1004   | 动物类别错误     | 动物种类必须为 BMARFS 的组合或空白。2.0 只支持 BMAR 或空白（缺省只返回鸟类识别结果）；    |\n| 1010   | 动物 ID 错误     | 不存在的动物 ID 或当前未支持该动物类别百科查询。                                          |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recognitionId": {
+                          "type": "string"
+                        },
+                        "animal": {
+                          "type": "string"
+                        },
+                        "confidence": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "status": "success",
+                    "data": [
+                      1000,
+                      {
+                        "IOC分类状态": "正常",
+                        "IUCN": "LC",
+                        "id": 2245,
+                        "中文名": "锈喉马岛鹃",
+                        "中文属名": "马岛鹃属",
+                        "中文目名": "鹃形目",
+                        "中文科名": "杜鹃科",
+                        "中文纲名": "鸟纲",
+                        "亚种": [],
+                        "命名作者": "Grandidier, A, 1867",
+                        "引用说明": "梅坚，董昊，懂鸟, AI 生成中文科普资料（鸟类，2024.07），https://dongniao.net/nd/2245",
+                        "拉丁学名": "Coua cursor",
+                        "拉丁目名": "CUCULIFORMES",
+                        "拉丁科名": "Cuculidae",
+                        "拉丁纲名": "Aves",
+                        "描述": {
+                          "保护现状": "IUCN：LC（无危）",
+                          "其他": "",
+                          "区别辨识": "与红顶马岛鹃相似，但尾巴和腿较短，面部裸皮部分呈粉红色。",
+                          "地理分布": "分布于马达加斯加的西南部和南部海岸。",
+                          "外形特征": "成年锈喉马岛鹃体长约34至40厘米，重约118克。上体淡灰绿色，面部有一条黑色线纹，尾羽灰色（非蓝灰色）；喉部为红褐色，胸部呈淡紫色，腹部白色，两胁灰色，下尾覆羽灰色（非紫色）；眼周裸皮蓝色，后方有明显粉红色斑块，虹膜棕色，喙和脚均为黑色。幼鸟色泽较暗淡，面部无黑色，背部、臀部及翼羽覆羽边缘泛黄，喙色较浅。",
+                          "生活习性": "锈喉马岛鹃主要栖息在马达加斯加南部和西南部的次热带或热带干燥森林中，偏好亚干旱荆棘灌木丛、刺状沙漠、干燥林地和低矮森林。它是一种陆栖鸟类，通常独居或成对活动，受到威胁时会奔跑。其饮食包括甲虫、蚂蚁、蜘蛛和植物。",
+                          "生长繁殖": "繁殖季节通常在雨季，大约在十月产卵。筑巢于距地面约2米高的灌木丛中，巢由树枝和树皮构成，内部铺垫以叶柄。",
+                          "综述": "锈喉马岛鹃（英文名：Running Coua，学名：Coua cursor），是鹃形目杜鹃科马岛鹃属的独特鸟类。其最显著的特征是长尾和长腿，面部裸露皮肤呈蓝粉色。分布于马达加斯加西南部的刺状森林中，性格较为害羞。",
+                          "鸣叫特征": "发出响亮清晰的“kewkewkew-kookoor”叫声，也会发出咕哝声和地面叫声“ay-reeyoo”。"
+                        },
+                        "最近更新": "20240712 155748",
+                        "版权": "CC BY 4.0",
+                        "英文名": "Running Coua",
+                        "英文维基网址": "https://en.wikipedia.org/wiki/Running_coua"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "系统异常",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "状态值",
+                  "message": "错误描述"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "   /dongniao": {
+      "post": {
+        "summary": "查询配额剩余次数",
+        "description": "查询当前 api_key 的已用次数、总额度和剩余次数。\n\n**特点**：\n- 本接口**不消耗配额**，可放心调用\n- 配额耗尽（used >= total）时仍能返回，便于客户端确认\"已用完\"\n- 限流 60 次/分钟(按 api_key+IP 维度)\n- 仅支持 api_key 鉴权（web_token 不支持）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "quota": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "固定填 `1`"
+                  }
+                },
+                "required": ["quota"]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "header",
+            "name": "api_key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "调用的 api_key"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "### 返回值含义描述\n\n| 返回值 | 含义 | 描述 |\n|--------|------|------|\n| 1000   | 查询成功 | 返回 used / total / remaining / status 四个字段。total=-1 表示无限额度，此时 remaining 也为 -1。 |\n| 1005   | Key 不匹配 | api_key 不存在、已禁用或调用方使用了 web_token（不支持）。 |\n| 1006   | IP 不在白名单 | Key 绑定了 IP 白名单而调用方 IP 不匹配。 |\n| 1007   | 触发限流 | 每 api_key+IP 每分钟限 60 次。HTTP 503。 |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": [1000, { "used": 1234, "total": 10000, "remaining": 8766, "status": "active" }]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "系统异常",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "状态值",
+                  "message": "错误描述"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
