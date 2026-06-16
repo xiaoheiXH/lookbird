@@ -508,7 +508,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 懂鸟API配置
     const API_KEY = 'BmVwWZ6fxwsaSvrZ8AEmkeZT';
-    const API_BASE = '/api/dongniao'; // 使用本地代理避免跨域
+    
+    // 检测环境，选择合适的API地址
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    let API_BASE;
+    
+    if (isLocalhost) {
+        // 本地环境使用本地代理
+        API_BASE = '/api/dongniao';
+    } else {
+        // Vercel/其他环境使用Serverless Function
+        API_BASE = '/api/dongniao';
+    }
 
     // 识别鸟类
     btnRecognize.addEventListener('click', async () => {
