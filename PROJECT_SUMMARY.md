@@ -151,8 +151,14 @@ guanniao/
 - **API Key**：`BmVwWZ6fxwsaSvrZ8AEmkeZT`
 - **API文档**：见 `doc.json`
 - **代理实现**：
-  - 本地开发：`server.js` 中的代理
-  - Vercel部署：`api/dongniao.js` Serverless Function
+  - 本地开发：`server.js` 中的代理（完全正常工作）
+  - Vercel部署：需要额外的代理服务（见 `API_DEPLOYMENT.md`）
+
+### ⚠️ 重要：关于CORS跨域问题
+懂鸟AI API (`https://ai.open.hhodata.com`) **不允许直接从浏览器调用**，会遇到跨域问题：
+- ✅ **本地开发**：`npm start` 启动本地服务器，代理正常工作
+- ❌ **Vercel纯静态部署**：需要额外的代理服务（推荐 Cloudflare Workers）
+- 详细解决方案见 `API_DEPLOYMENT.md`
 
 ### API流程
 1. 上传图片 → 获得 recognitionId

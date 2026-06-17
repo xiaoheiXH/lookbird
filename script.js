@@ -474,6 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const reader = new FileReader();
             reader.onload = (event) => {
                 previewImage.src = event.target.result;
+                uploadedImageUrl = event.target.result; // 保存图片URL，用于详情页显示
                 previewImage.style.display = 'block';
                 uploadPlaceholder.style.display = 'none';
                 btnRecognize.style.display = 'inline-block';
@@ -508,18 +509,63 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 懂鸟API配置
     const API_KEY = 'BmVwWZ6fxwsaSvrZ8AEmkeZT';
-    
-    // 检测环境，选择合适的API地址
-    const hostname = window.location.hostname;
-    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
-    let API_BASE;
-    
-    if (isLocalhost) {
-        // 本地环境使用本地代理
-        API_BASE = '/api/dongniao';
-    } else {
-        // Vercel/其他环境使用Serverless Function
-        API_BASE = '/api/dongniao';
+    const API_BASE = 'https://api.allorigins.win/raw?url=https://ai.open.hhodata.com/api/v2/dongniao';
+
+    // 图片压缩函数
+    async function compressImage(file, maxSizeMB = 2) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    // 计算压缩比例，保持宽高比
+                    const maxWidth = 1920;
+                    const maxHeight = 1080;
+                    if (width > maxWidth || height > maxHeight) {
+                        if (width > height) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        } else {
+                            width = Math.round((width * maxHeight) / height);
+                            height = maxHeight;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // 压缩质量从0.8开始，逐渐降低直到小于maxSizeMB
+                    let quality = 0.8;
+                    let result = canvas.toDataURL('image/jpeg', quality);
+                    
+                    while (result.length > maxSizeMB * 1024 * 1024 * 1.37 && quality > 0.1) {
+                        quality -= 0.1;
+                        result = canvas.toDataURL('image/jpeg', quality);
+                    }
+                    
+                    // 将base64转换回File对象
+                    const arr = result.split(',');
+                    const mime = arr[0].match(/:(.*?);/)[1];
+                    const bstr = atob(arr[1]);
+                    let n = bstr.length;
+                    const u8arr = new Uint8Array(n);
+                    while (n--) {
+                        u8arr[n] = bstr.charCodeAt(n);
+                    }
+                    
+                    resolve(new File([u8arr], file.name, { type: mime }));
+                };
+            };
+        });
     }
 
     // 识别鸟类
@@ -528,13 +574,21 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('请先选择图片或拍照');
             return;
         }
+        
+        // 检查文件大小，超过2MB则压缩
+        let fileToUpload = currentImageFile;
+        if (fileToUpload.size > 2 * 1024 * 1024) {
+            console.log('图片过大，开始压缩...');
+            fileToUpload = await compressImage(currentImageFile, 2);
+            console.log(`压缩完成，原大小: ${(currentImageFile.size / 1024 / 1024).toFixed(2)}MB，新大小: ${(fileToUpload.size / 1024 / 1024).toFixed(2)}MB`);
+        }
 
         btnRecognize.textContent = '识别中...';
         btnRecognize.disabled = true;
 
         try {
             // 1. 上传图片获取识别ID
-            const recognitionId = await uploadImage(currentImageFile);
+            const recognitionId = await uploadImage(fileToUpload);
             console.log('识别ID:', recognitionId);
 
             // 2. 轮询获取识别结果
@@ -576,10 +630,12 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('class', 'B');
         formData.append('did', generateDeviceId());
 
-        console.log('发送请求到:', API_BASE);
+        // 直接调用懂鸟API，使用一个简单的CORS代理
+        const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
+        const targetUrl = 'https://ai.open.hhodata.com/api/v2/dongniao';
         
         try {
-            const response = await fetch(API_BASE, {
+            const response = await fetch(targetUrl, {
                 method: 'POST',
                 headers: {
                     'api_key': API_KEY
@@ -589,15 +645,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             console.log('响应状态:', response.status);
             
-            const text = await response.text();
-            console.log('原始响应:', text);
-            
             let result;
             try {
-                result = JSON.parse(text);
+                result = await response.json();
             } catch (e) {
-                console.log('响应不是JSON，直接处理');
-                result = { raw: text };
+                const text = await response.text();
+                console.log('原始响应:', text);
+                throw new Error('API响应格式错误');
             }
             
             console.log('完整响应:', result);
@@ -613,13 +667,46 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('上传请求出错:', error);
-            throw error;
+            // 如果直接调用失败，尝试使用代理
+            console.log('尝试使用CORS代理...');
+            return uploadImageWithProxy(file);
+        }
+    }
+    
+    // 使用代理上传图片
+    async function uploadImageWithProxy(file) {
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('upload', '1');
+        formData.append('class', 'B');
+        formData.append('did', generateDeviceId());
+        
+        const proxyUrl = 'https://corsproxy.io/?';
+        const targetUrl = 'https://ai.open.hhodata.com/api/v2/dongniao';
+        
+        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
+            method: 'POST',
+            headers: {
+                'api_key': API_KEY
+            },
+            body: formData
+        });
+        
+        const result = await response.json();
+        console.log('代理响应:', result);
+        
+        if (result.status === '1000' || result.data?.[0] === 1000 || result[0] === 1000) {
+            const recognitionId = result.data?.[1] || result[1] || result.data?.recognitionId;
+            return recognitionId;
+        } else {
+            throw new Error(result.message || '代理上传失败');
         }
     }
 
     // 轮询识别结果
     async function pollRecognitionResult(recognitionId, maxRetries = 15) {
         console.log('开始轮询识别结果，ID:', recognitionId);
+        const targetUrl = 'https://ai.open.hhodata.com/api/v2/dongniao';
         
         for (let i = 0; i < maxRetries; i++) {
             console.log(`第 ${i + 1} 次尝试...`);
@@ -629,7 +716,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const formData = new FormData();
                 formData.append('resultid', recognitionId);
 
-                const response = await fetch(API_BASE, {
+                const response = await fetch(targetUrl, {
                     method: 'POST',
                     headers: {
                         'api_key': API_KEY
@@ -637,15 +724,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: formData
                 });
 
-                const text = await response.text();
-                console.log('轮询原始响应:', text);
-                
                 let result;
                 try {
-                    result = JSON.parse(text);
+                    result = await response.json();
                 } catch (e) {
-                    console.log('响应不是JSON，尝试其他格式');
-                    result = { raw: text };
+                    const text = await response.text();
+                    console.log('原始响应:', text);
+                    throw new Error('响应格式错误');
                 }
                 
                 console.log('识别结果响应:', result);
@@ -665,12 +750,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (error) {
                 console.error('轮询请求出错:', error);
-                // 如果是最后一次尝试，抛出错误
                 if (i === maxRetries - 1) {
                     throw error;
                 }
-                // 否则继续尝试
-                console.log('继续下一次尝试...');
             }
         }
         throw new Error('识别超时，请重试');
@@ -679,12 +761,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 获取百科资料
     async function getEncyclopediaData(animalId, animalClass) {
         console.log('获取百科资料，动物ID:', animalId, '类别:', animalClass);
+        const targetUrl = 'https://ai.open.hhodata.com/api/v2/dongniao';
         
         const formData = new FormData();
         formData.append('animalid', animalId.toString());
         formData.append('class', animalClass);
 
-        const response = await fetch(API_BASE, {
+        const response = await fetch(targetUrl, {
             method: 'POST',
             headers: {
                 'api_key': API_KEY
@@ -721,19 +804,30 @@ document.addEventListener('DOMContentLoaded', () => {
         switchScene('lookbook-scene');
     });
 
+    // 保存用户上传的图片URL
+    let uploadedImageUrl = '';
+    
     // 显示鸟类详情
     function showBirdDetail(nameInfo, confidence, encyclopediaData) {
-        const detailContent = document.getElementById('bird-detail-content');
         const chineseName = nameInfo[0] || '未知鸟类';
         const englishName = nameInfo[1] || '';
         const latinName = nameInfo[2] || '';
-
-        let html = `
-            <div class="bird-detail-card">
-                <div class="bird-name">${chineseName}</div>
-                <div class="bird-latin">${latinName}${englishName ? ' | ' + englishName : ''}</div>
-                <div class="bird-conf">置信度: ${confidence.toFixed(1)}%</div>
-        `;
+        
+        // 显示用户上传的图片
+        const uploadedImageEl = document.getElementById('bird-uploaded-image');
+        uploadedImageEl.src = uploadedImageUrl;
+        
+        // 显示鸟类名称
+        const nameEl = document.getElementById('bird-name-detail');
+        nameEl.textContent = chineseName;
+        
+        // 显示置信度
+        const confEl = document.getElementById('bird-confidence-detail');
+        confEl.textContent = `置信度: ${confidence.toFixed(1)}%`;
+        
+        // 显示右侧详细信息
+        const detailContent = document.getElementById('bird-detail-content');
+        let html = '';
 
         if (encyclopediaData && encyclopediaData.describe) {
             const desc = encyclopediaData.describe;
@@ -755,7 +849,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
 
-        html += '</div>';
         detailContent.innerHTML = html;
         switchScene('bird-detail-scene');
     }

@@ -140,8 +140,23 @@
             <div class="lookbook-background"></div>
             <div class="detail-container">
                 <button id="btn-back-detail" class="back-button">返回</button>
-                <div class="bird-detail-content" id="bird-detail-content">
-                    <div class="loading-text">加载中...</div>
+                <div class="bird-detail-layout">
+                    <!-- 左边：用户上传的图片 + 鸟类信息 -->
+                    <div class="bird-detail-left">
+                        <div class="bird-uploaded-image-wrapper">
+                            <img id="bird-uploaded-image" class="bird-uploaded-image" />
+                        </div>
+                        <div class="bird-info-wrapper">
+                            <h2 id="bird-name-detail" class="bird-name-detail"></h2>
+                            <p id="bird-confidence-detail" class="bird-confidence-detail"></p>
+                        </div>
+                    </div>
+                    <!-- 右边：详细介绍 -->
+                    <div class="bird-detail-right">
+                        <div id="bird-detail-content" class="bird-detail-text">
+                            <div class="loading-text">加载中...</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

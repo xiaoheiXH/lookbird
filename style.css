@@ -847,3 +847,124 @@ html, body {
     line-height: 1.8;
     text-align: justify;
 }
+
+/* ==========================================
+   鸟类详情页样式 - 可调整位置备注
+   ========================================== */
+
+/* 详情页总容器：调整整体位置 */
+.detail-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 80px 40px 40px; /* [上, 左右, 下] 调整边距 */
+    z-index: 10;
+}
+
+/* 详情页布局容器：左右分栏 */
+.bird-detail-layout {
+    display: flex;
+    gap: 50px; /* 左右两栏之间的间距 */
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ==========================================
+   左侧：用户上传的图片 + 鸟类信息
+   ========================================== */
+
+.bird-detail-left {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; /* 图片和文字之间的间距 */
+}
+
+/* 上传的图片容器 */
+.bird-uploaded-image-wrapper {
+    /* 调整图片整体位置 */
+}
+
+/* 上传的图片样式 */
+.bird-uploaded-image {
+    max-height: 400px; /* 调整图片最大高度 */
+    max-width: 500px; /* 调整图片最大宽度 */
+    object-fit: contain;
+    border-radius: 15px; /* 圆角大小 */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3); /* 阴影效果 */
+}
+
+/* 鸟类信息容器（名称+置信度） */
+.bird-info-wrapper {
+    text-align: center;
+    background: rgba(255,255,255,0.95);
+    padding: 15px 30px; /* 内边距 [上下, 左右] */
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* 鸟类名称样式 */
+.bird-name-detail {
+    color: #2c3e50;
+    font-size: 2rem; /* 调整字体大小 */
+    margin: 0 0 8px 0; /* 间距 */
+}
+
+/* 置信度样式 */
+.bird-confidence-detail {
+    color: #e67e22; /* 置信度颜色 */
+    font-size: 1.2rem; /* 调整字体大小 */
+    margin: 0;
+}
+
+/* ==========================================
+   右侧：详细介绍
+   ========================================== */
+
+.bird-detail-right {
+    flex: 1;
+    max-width: 550px; /* 调整右侧卡片最大宽度 */
+    background: rgba(255,255,255,0.95);
+    padding: 30px; /* 卡片内边距 */
+    border-radius: 20px; /* 圆角 */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    margin-left: 10%; /* 向右移动整个页面宽度的10% */
+}
+
+/* 右侧文字区域 */
+.bird-detail-text {
+    max-height: 550px; /* 调整最大高度 */
+    overflow-y: auto; /* 超出可滚动 */
+}
+
+/* 单个信息项（综述/外形特征等） */
+.bird-info-item {
+    margin-bottom: 20px; /* 每个项之间的间距 */
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+/* 最后一项去掉下边框 */
+.bird-info-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+/* 信息标签（标题） */
+.bird-info-label {
+    color: #3498db;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+/* 信息内容 */
+.bird-info-content {
+    color: #34495e;
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
