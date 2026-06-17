@@ -70,14 +70,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 点击 re-box.png 跳转到相机选取页面
+    function goToCameraSelectFromEquipment() {
+        console.log('跳转到相机选取...');
+        document.getElementById('equipment-select').classList.remove('active');
+        document.getElementById('camera-select').classList.add('active');
+    }
+
     const imgReBox = document.getElementById('img-re-box');
     if (imgReBox) {
         imgReBox.addEventListener('click', () => {
-            console.log('跳转到相机选取...');
-            document.getElementById('equipment-select').classList.remove('active');
-            document.getElementById('camera-select').classList.add('active');
+            goToCameraSelectFromEquipment();
         });
     }
+
+    const equipmentDecorations = document.querySelectorAll('.equipment-decoration');
+    equipmentDecorations.forEach(el => {
+        el.addEventListener('click', () => {
+            goToCameraSelectFromEquipment();
+        });
+    });
 
     // --- 相机选择逻辑 ---
     const camera1 = document.querySelector('.camera-1');
@@ -121,7 +132,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 场景选择与跳转逻辑 ---
+    const thumbMountain = document.getElementById('thumb-mountain');
     const thumbHekou = document.getElementById('thumb-hekou');
+
+    function resetMountainSceneLayers() {
+        const mountainTrigger = document.getElementById('mountain-trigger');
+        const mountainBird = document.getElementById('mountain-bird');
+        if (!mountainTrigger || !mountainBird) return;
+
+        mountainTrigger.classList.add('is-top');
+        mountainBird.classList.remove('is-top');
+    }
+
+    if (thumbMountain) {
+        thumbMountain.addEventListener('click', () => {
+            console.log('选择场景：山中树丛02');
+            if (window.GameData) {
+                window.GameData.currentScene = 'scene-mountain-02';
+                window.GameData.showStatus();
+            }
+
+            resetMountainSceneLayers();
+            document.getElementById('scene-selection').classList.remove('active');
+            document.getElementById('scene-mountain-02').classList.add('active');
+        });
+    }
+
     if (thumbHekou) {
         thumbHekou.addEventListener('click', () => {
             console.log('选择场景：河口湿地公园01');
@@ -132,6 +168,20 @@ document.addEventListener('DOMContentLoaded', () => {
             // 跳转到场景01
             document.getElementById('scene-selection').classList.remove('active');
             document.getElementById('scene-hekou-01').classList.add('active');
+        });
+    }
+
+    const mountainTrigger = document.getElementById('mountain-trigger');
+    const mountainBird = document.getElementById('mountain-bird');
+    if (mountainTrigger && mountainBird) {
+        mountainTrigger.addEventListener('click', () => {
+            console.log('点击山中树丛交互点，切换图层后进入 Touch 环节');
+            mountainTrigger.classList.remove('is-top');
+            mountainBird.classList.add('is-top');
+
+            window.setTimeout(() => {
+                startTouchScene('bird02', 'tree', '场景_山中树丛02_场景图02_底图.png');
+            }, 220);
         });
     }
 
@@ -361,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 设置背景和鸟类 (300% 缩放世界
         cameraBg.style.backgroundImage = `url('images/${bgImage}')`;
-        cameraBird.src = `images/${birdData.states[stateKey].touch}`;
+        cameraBird.src = `images/${birdData.states[stateKey].capture}`;
         
         // 保持原世界的鸟类位置
         cameraBird.style.left = data.savedBirdLeft;
@@ -506,6 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 图鉴按钮点击
     btnCollection.addEventListener('click', () => {
         console.log('查看图鉴...');
+        setLookbookPage(0);
         switchScene('lookbook-scene');
     });
 
@@ -514,6 +565,58 @@ document.addEventListener('DOMContentLoaded', () => {
     btnBackLookbook.addEventListener('click', () => {
         switchScene('main-menu');
     });
+
+    const lookbookPages = [
+        {
+            image: 'images/book_bird1.jpg',
+            title: '大白鹭',
+            description: '大白鹭（学名：Ardea alba）是鹈形目鹭科鹭属鸟类，又名白庄、公子、白洼。全身羽毛洁白；眼黄色；喙橙黄色（繁殖期黑色）；面部及周眼皮肤呈绿色；跗蹠和脚黑色。背上、肩上披有蓑羽，长超过尾部，生殖期后蓑羽消失。大白鹭广泛分布在世界各地。在中国见于东北、河北、江苏、云南、广东、海南、台湾、福建等地。栖息于河川、海滨、沼泽湿地或水田中。'
+        },
+        {
+            image: 'images/book_bird2.jpg',
+            title: '白头鹎',
+            description: '白头鹎（Pycnonotus sinensis），别名白头翁、白头婆、中国鹎等，为鹎科鹎属的小型鸣禽，体长17~22cm，体重26~43g。雌雄羽色相似，白色枕环从眼睛后部延伸到颈背，是该物种的显著特征。白头鹎头顶、喙黑色，颏、喉部白色，颊、耳羽、颧纹黑褐色，耳羽后有白色斑块，上体灰褐色，下体灰白色，翅缘为黄绿色，胸部灰色，臀部白色，跗蹠、爪深褐色，翅尾深褐色；幼鸟头部为橄榄色，胸部有灰色斑纹。白头鹎主要分布于越南的北部、琉球群岛、中国中东部及南部各省区。主要为留鸟，一般不迁徙，栖息于海拔1000米以下的低山丘陵至平原地区的森林等地，也会生活在村落和城市公园。'
+        }
+    ];
+
+    let currentLookbookPageIndex = 0;
+
+    function setLookbookPage(index) {
+        const count = lookbookPages.length;
+        if (count === 0) return;
+        currentLookbookPageIndex = ((index % count) + count) % count;
+        renderLookbookPage();
+    }
+
+    function renderLookbookPage() {
+        const page = lookbookPages[currentLookbookPageIndex];
+        if (!page) return;
+
+        const imgEl = document.getElementById('lookbook-image');
+        const titleEl = document.getElementById('lookbook-title');
+        const descEl = document.getElementById('lookbook-description');
+
+        if (imgEl) {
+            imgEl.src = page.image;
+            imgEl.alt = page.title;
+        }
+        if (titleEl) titleEl.textContent = page.title;
+        if (descEl) descEl.textContent = page.description;
+    }
+
+    const lookbookPrev = document.getElementById('lookbook-prev');
+    const lookbookNext = document.getElementById('lookbook-next');
+
+    if (lookbookPrev) {
+        lookbookPrev.addEventListener('click', () => {
+            setLookbookPage(currentLookbookPageIndex - 1);
+        });
+    }
+    if (lookbookNext) {
+        lookbookNext.addEventListener('click', () => {
+            setLookbookPage(currentLookbookPageIndex + 1);
+        });
+    }
 
     // 福州市区鸟类识别按钮
     const btnIdentify = document.getElementById('btn-identify');
@@ -880,6 +983,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const cameraEndButton = document.getElementById('camera-end-button');
     cameraEndButton.addEventListener('click', () => {
         console.log('Camera阶段结束，跳转到图鉴页面');
+        if (window.GameData && window.GameData.touchData && window.GameData.touchData.bgImage === '场景_山中树丛02_场景图02_底图.png') {
+            setLookbookPage(1);
+        } else {
+            setLookbookPage(0);
+        }
         switchScene('lookbook-scene');
     });
 

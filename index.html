@@ -31,6 +31,9 @@
             <div class="background-layer"></div>
             <div class="ui-layer">
                 <div class="center-content">
+                    <img src="images/box1-1.png" alt="box1-1" class="equipment-decoration equip-box-1">
+                    <img src="images/box1-2.png" alt="box1-2" class="equipment-decoration equip-box-2">
+                    <img src="images/box1-3.png" alt="box1-3" class="equipment-decoration equip-box-3">
                     <img src="images/re-box.png" alt="装备选择框" class="re-box" id="img-re-box">
                 </div>
             </div>
@@ -52,7 +55,19 @@
             <div class="background-layer"></div>
             <div class="ui-layer">
                 <div class="scene-option-container">
+                    <img src="images/场景选择_山中楼梯_小图.png" alt="山中树丛" class="scene-option-thumb" id="thumb-mountain">
                     <img src="images/场景选择_河口湿地公园_小图.png" alt="河口湿地公园" class="scene-option-thumb" id="thumb-hekou">
+                </div>
+            </div>
+        </section>
+
+        <!-- 场景02：山中树丛02 -->
+        <section id="scene-mountain-02" class="scene">
+            <div class="background-layer"></div>
+            <div class="ui-layer">
+                <div class="interactive-points mountain-interactive-points">
+                    <img src="images/鸟_白头鹎01_树从上_拍摄.png" alt="白头鹎" class="point mountain-bird" id="mountain-bird">
+                    <img src="images/场景_山中树丛02_场景图02_交互01.png" alt="山中树丛交互点" class="point mountain-trigger is-top" id="mountain-trigger">
                 </div>
             </div>
         </section>
@@ -167,15 +182,17 @@
             <div class="lookbook-container">
                 <button id="btn-back-lookbook" class="back-button">返回</button>
                 <div class="lookbook-content">
+                    <button class="lookbook-nav lookbook-nav-left" id="lookbook-prev" aria-label="上一页">&lt;</button>
                     <div class="lookbook-left">
-                        <img src="images/book_bird1.jpg" alt="大白鹭" class="lookbook-image">
+                        <img src="images/book_bird1.jpg" alt="大白鹭" class="lookbook-image" id="lookbook-image">
                     </div>
                     <div class="lookbook-right">
-                        <h2 class="lookbook-title">大白鹭</h2>
-                        <p class="lookbook-description">
+                        <h2 class="lookbook-title" id="lookbook-title">大白鹭</h2>
+                        <p class="lookbook-description" id="lookbook-description">
                             大白鹭（学名：Ardea alba）是鹈形目鹭科鹭属鸟类，又名白庄、公子、白洼。全身羽毛洁白；眼黄色；喙橙黄色（繁殖期黑色）；面部及周眼皮肤呈绿色；跗蹠和脚黑色。背上、肩上披有蓑羽，长超过尾部，生殖期后蓑羽消失。大白鹭广泛分布在世界各地。在中国见于东北、河北、江苏、云南、广东、海南、台湾、福建等地。栖息于河川、海滨、沼泽湿地或水田中。
                         </p>
                     </div>
+                    <button class="lookbook-nav lookbook-nav-right" id="lookbook-next" aria-label="下一页">&gt;</button>
                 </div>
             </div>
         </section>

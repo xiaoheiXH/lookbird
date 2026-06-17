@@ -68,14 +68,58 @@ html, body {
     z-index: 1;
 }
 
-/* 装备选取框居中 */
-.re-box {
-    width: 50%;  /* 基于1280px宽度的50% = 640px */
+#equipment-select .ui-layer {
+    padding: 0;
+}
+
+#equipment-select .center-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.equipment-decoration {
+    position: absolute;
     height: auto;
-    object-fit: contain;
-    margin-top: 20.83%;  /* 150px / 720px ≈ 20.83% */
+    opacity: 1;
+    transform: translate(-50%, -50%);
     pointer-events: auto;
     cursor: pointer;
+    z-index: 20;
+}
+
+.equip-box-1 {
+    width: 120px;
+    left: 40.3%;
+    top: 42.2%;
+}
+
+.equip-box-2 {
+    width: 120px;
+    left: 48.7%;
+    top: 39.7%;
+}
+
+.equip-box-3 {
+    width: 233px;
+    left: 43%;
+    top: 54.1%;
+}
+
+.re-box {
+    position: absolute;
+    width: 601px;
+    left: 49.1%;
+    top: 62.2%;
+    height: auto;
+    opacity: 1;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    pointer-events: auto;
+    cursor: pointer;
+    z-index: 10;
 }
 
 /* 相机选取页面背景 */
@@ -147,23 +191,40 @@ html, body {
 /* 场景选择交互选项容器 */
 .scene-option-container {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: auto;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    transform: none;
+    display: block;
+    pointer-events: none;
 }
 
 .scene-option-thumb {
-    width: 300px; /* 默认宽度，可根据需要调整 */
+    position: absolute;
+    width: 300px;
     height: auto;
     cursor: pointer;
     transition: transform 0.3s;
-    /* 页面位置信息里加入旋转：预留调整代码 */
-    transform: rotate(-5deg); /* 示例旋转角度 */
+    pointer-events: auto;
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--rot));
 }
 
 .scene-option-thumb:hover {
-    transform: translate(0, -10px) rotate(0deg) scale(1.05);
+    transform: translate(-50%, -50%) translateY(-10px) rotate(var(--rot)) scale(1.05);
+}
+
+#thumb-mountain {
+    left: 49.9%;
+    top: 46.6%;
+    --rot: 10deg;
+}
+
+#thumb-hekou {
+    left: 22.3%;
+    top: 30.8%;
+    --rot: -13deg;
 }
 
 /* 场景01背景：河口湿地公园01 */
@@ -177,6 +238,57 @@ html, body {
     background-size: 100% 100%; /* 固定比例填充 */
     background-position: center;
     z-index: 1;
+}
+
+/* 场景02背景：山中树丛02 */
+#scene-mountain-02 .background-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('images/场景_山中树丛02_场景图02_底图.png');
+    background-size: 100% 100%;
+    background-position: center;
+    z-index: 1;
+}
+
+.mountain-interactive-points {
+    pointer-events: none;
+}
+
+.mountain-bird,
+.mountain-trigger {
+    transform: translate(-50%, -50%);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.mountain-bird {
+    width: 120px;
+    left: 78%;
+    top: 68.4%;
+    z-index: 2;
+    pointer-events: none;
+    cursor: default;
+}
+
+.mountain-trigger {
+    width: 800px;
+    left: 56.6%;
+    top: 63.4%;
+    z-index: 3;
+}
+
+.mountain-trigger.is-top {
+    z-index: 4;
+}
+
+.mountain-bird.is-top {
+    z-index: 5;
+}
+
+.mountain-trigger:active {
+    transform: translate(-50%, -50%) scale(0.98);
 }
 
 /* 场景01交互点容器 */
@@ -458,7 +570,7 @@ html, body {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: fill;
     z-index: 100;
     pointer-events: none; /* 边框不阻挡鼠标事件 */
 }
@@ -803,12 +915,42 @@ html, body {
 }
 
 .lookbook-content {
+    position: relative;
     display: flex;
     gap: 40px;
     width: 100%;
     height: 100%;
     align-items: center;
     justify-content: center;
+}
+
+.lookbook-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    font-size: 32px;
+    line-height: 56px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 30;
+    pointer-events: auto;
+}
+
+.lookbook-nav-left {
+    left: 10px;
+}
+
+.lookbook-nav-right {
+    right: 10px;
+}
+
+.lookbook-nav:active {
+    transform: translateY(-50%) scale(0.95);
 }
 
 .lookbook-left {
@@ -967,4 +1109,3 @@ html, body {
     line-height: 1.7;
     font-size: 1rem;
 }
-

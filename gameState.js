@@ -15,7 +15,8 @@ window.GameData = {
     
     // 场景环境属性
     sceneAttributes: {
-        'scene-hekou-01': ['water', 'tree', 'sky']
+        'scene-hekou-01': ['water', 'tree', 'sky'],
+        'scene-mountain-02': ['tree', 'forest']
     },
 
     // 鸟类数据定义
@@ -27,6 +28,16 @@ window.GameData = {
                 'water': {
                     touch: '鸟_白鹭01_水上_取景.png',
                     capture: '鸟_白鹭01_水上_拍摄.png'
+                }
+            }
+        },
+        'bird02': {
+            name: '白头鹎',
+            attributes: ['tree', 'forest'],
+            states: {
+                'tree': {
+                    touch: '鸟_白头鹎01_树从上_拍摄.png',
+                    capture: '鸟_白头鹎01_树从上_拍摄.png'
                 }
             }
         }
