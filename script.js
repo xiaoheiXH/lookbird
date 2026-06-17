@@ -196,20 +196,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const touchScene = document.getElementById('touch-scene');
     
+    // 辅助函数：获取事件坐标（兼容鼠标和触摸）
+    function getEventCoords(e) {
+        if (e.touches && e.touches.length > 0) {
+            return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        return { x: e.clientX, y: e.clientY };
+    }
+
+    // 鼠标事件
     touchScene.addEventListener('mousedown', (e) => {
         if (window.GameData.touchData.isSuccess) return;
         isPanning = true;
-        startX = e.clientX;
-        startY = e.clientY;
+        const coords = getEventCoords(e);
+        startX = coords.x;
+        startY = coords.y;
         initialWorldX = window.GameData.touchData.worldX;
         initialWorldY = window.GameData.touchData.worldY;
     });
 
+    // 触摸事件
+    touchScene.addEventListener('touchstart', (e) => {
+        if (window.GameData.touchData.isSuccess) return;
+        isPanning = true;
+        const coords = getEventCoords(e);
+        startX = coords.x;
+        startY = coords.y;
+        initialWorldX = window.GameData.touchData.worldX;
+        initialWorldY = window.GameData.touchData.worldY;
+        e.preventDefault(); // 防止页面滚动
+    });
+
+    // 鼠标移动
     window.addEventListener('mousemove', (e) => {
         if (!isPanning) return;
         
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
+        const coords = getEventCoords(e);
+        const dx = coords.x - startX;
+        const dy = coords.y - startY;
         
         // 更新世界坐标
         window.GameData.touchData.worldX = initialWorldX + dx;
@@ -226,7 +250,37 @@ document.addEventListener('DOMContentLoaded', () => {
         checkBirdCentered();
     });
 
+    // 触摸移动
+    window.addEventListener('touchmove', (e) => {
+        if (!isPanning) return;
+        
+        const coords = getEventCoords(e);
+        const dx = coords.x - startX;
+        const dy = coords.y - startY;
+        
+        // 更新世界坐标
+        window.GameData.touchData.worldX = initialWorldX + dx;
+        window.GameData.touchData.worldY = initialWorldY + dy;
+        
+        // 限制拖拽边界 (300% 背景，容器 1280x720)
+        // 世界大小 3840x2160
+        const minX = -(3840 - 1280);
+        const minY = -(2160 - 720);
+        window.GameData.touchData.worldX = Math.max(minX, Math.min(0, window.GameData.touchData.worldX));
+        window.GameData.touchData.worldY = Math.max(minY, Math.min(0, window.GameData.touchData.worldY));
+        
+        updateTouchWorldPosition();
+        checkBirdCentered();
+        e.preventDefault(); // 防止页面滚动
+    });
+
+    // 鼠标释放
     window.addEventListener('mouseup', () => {
+        isPanning = false;
+    });
+
+    // 触摸释放
+    window.addEventListener('touchend', () => {
         isPanning = false;
     });
 
@@ -363,7 +417,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // 记录初始角度
         zoomInitialAngle = currentZoomAngle;
         
+        // 鼠标事件
         zoomControl.addEventListener('mousedown', (e) => {
+            isZoomDragging = true;
+            zoomStartAngle = getAngle(e);
+            zoomInitialAngle = currentZoomAngle;
+            e.preventDefault();
+        });
+
+        // 触摸事件
+        zoomControl.addEventListener('touchstart', (e) => {
             isZoomDragging = true;
             zoomStartAngle = getAngle(e);
             zoomInitialAngle = currentZoomAngle;
@@ -388,20 +451,46 @@ document.addEventListener('DOMContentLoaded', () => {
             zoomControl.style.transform = `rotate(${currentZoomAngle}deg)`;
         });
 
+        window.addEventListener('touchmove', (e) => {
+            if (!isZoomDragging) return;
+            
+            const currentAngle = getAngle(e);
+            let deltaAngle = currentAngle - zoomStartAngle;
+            
+            // 处理跨0度的情况
+            if (deltaAngle > 180) deltaAngle -= 360;
+            if (deltaAngle < -180) deltaAngle += 360;
+            
+            // 计算新角度，改为逆时针，并限制在0到-90度
+            let newAngle = zoomInitialAngle + deltaAngle;
+            newAngle = Math.max(-90, Math.min(0, newAngle));
+            
+            currentZoomAngle = newAngle;
+            zoomControl.style.transform = `rotate(${currentZoomAngle}deg)`;
+            e.preventDefault();
+        });
+
         window.addEventListener('mouseup', () => {
+            isZoomDragging = false;
+        });
+
+        window.addEventListener('touchend', () => {
             isZoomDragging = false;
         });
     }
 
-    // 计算鼠标相对于元素中心的角度
+    // 计算鼠标/触摸相对于元素中心的角度
     function getAngle(e) {
         const zoomControl = document.getElementById('zoom-control');
         const rect = zoomControl.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
         
+        // 获取坐标（兼容鼠标和触摸）
+        const coords = getEventCoords(e);
+        
         // 计算弧度并转换为角度
-        const radians = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+        const radians = Math.atan2(coords.y - centerY, coords.x - centerX);
         let degrees = radians * (180 / Math.PI);
         
         // 调整为0-360度
@@ -461,15 +550,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files[0]) {
             currentImageFile = e.target.files[0];
-            
-            // 检查文件大小（2MB限制）
-            const maxSize = 2 * 1024 * 1024;
-            if (currentImageFile.size > maxSize) {
-                alert(`图片过大！当前图片大小: ${(currentImageFile.size / 1024 / 1024).toFixed(2)}MB，最大支持2MB。请选择更小的图片。`);
-                currentImageFile = null;
-                fileInput.value = '';
-                return;
-            }
             
             const reader = new FileReader();
             reader.onload = (event) => {
