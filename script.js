@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('游戏设置已加载:', settings);
     });
 
+    // 全局变量：记录当前是否是竖屏旋转状态
+    let isPortraitMode = false;
+
     // 适配缩放逻辑
     function handleResize() {
         const container = document.getElementById('game-container');
@@ -35,9 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 计算缩放比例
         let scale = 1;
-        const isPortrait = windowHeight > windowWidth;
+        isPortraitMode = windowHeight > windowWidth;
 
-        if (isPortrait) {
+        if (isPortraitMode) {
             // 移动端竖屏：旋转并缩放
             scale = Math.min(windowHeight / designWidth, windowWidth / designHeight);
             container.style.transform = `translate(-50%, -50%) rotate(90deg) scale(${scale})`;
@@ -227,13 +230,22 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault(); // 防止页面滚动
     });
 
-    // 鼠标移动
-    window.addEventListener('mousemove', (e) => {
+    // 处理拖动逻辑的通用函数
+    function handleDragMove(e) {
         if (!isPanning) return;
         
         const coords = getEventCoords(e);
-        const dx = coords.x - startX;
-        const dy = coords.y - startY;
+        let dx = coords.x - startX;
+        let dy = coords.y - startY;
+        
+        // 竖屏模式下，容器旋转了90度，需要调整坐标
+        if (isPortraitMode) {
+            // 交换x和y，并且根据旋转调整方向
+            // 旋转90度后，屏幕坐标需要转换为容器坐标
+            const temp = dx;
+            dx = dy;
+            dy = -temp;
+        }
         
         // 更新世界坐标
         window.GameData.touchData.worldX = initialWorldX + dx;
@@ -248,29 +260,16 @@ document.addEventListener('DOMContentLoaded', () => {
         
         updateTouchWorldPosition();
         checkBirdCentered();
+    }
+
+    // 鼠标移动
+    window.addEventListener('mousemove', (e) => {
+        handleDragMove(e);
     });
 
     // 触摸移动
     window.addEventListener('touchmove', (e) => {
-        if (!isPanning) return;
-        
-        const coords = getEventCoords(e);
-        const dx = coords.x - startX;
-        const dy = coords.y - startY;
-        
-        // 更新世界坐标
-        window.GameData.touchData.worldX = initialWorldX + dx;
-        window.GameData.touchData.worldY = initialWorldY + dy;
-        
-        // 限制拖拽边界 (300% 背景，容器 1280x720)
-        // 世界大小 3840x2160
-        const minX = -(3840 - 1280);
-        const minY = -(2160 - 720);
-        window.GameData.touchData.worldX = Math.max(minX, Math.min(0, window.GameData.touchData.worldX));
-        window.GameData.touchData.worldY = Math.max(minY, Math.min(0, window.GameData.touchData.worldY));
-        
-        updateTouchWorldPosition();
-        checkBirdCentered();
+        handleDragMove(e);
         e.preventDefault(); // 防止页面滚动
     });
 
